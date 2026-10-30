@@ -13,10 +13,15 @@ cp .env.example .env
 ```
 
 ## Database
-Pick one (both: user/password/db `sbom`, port 5432):
+Pick one (both: user/password/db `sbom`, port 5432).
+
+Docker (runs `docker compose up -d db`):
 ```bash
-npm run db:up      # Docker: docker compose up -d db
-npm run db:local   # No Docker: prebuilt Postgres binaries, data in .pgdata (runs in foreground; Ctrl-C to stop)
+npm run db:up
+```
+No Docker (prebuilt Postgres binaries, data in `.pgdata`; runs in the foreground, Ctrl-C to stop):
+```bash
+npm run db:local
 ```
 Then apply the schema:
 ```bash
@@ -25,10 +30,15 @@ npm run db:migrate
 Stop the Docker DB with `npm run db:down`.
 
 ## Services
-Run each in its own terminal:
+Run each in its own terminal.
+
+Express API on :3000 (set `PORT` to override):
 ```bash
-npm run api      # Express API on :3000 (PORT to override)
-npm run worker   # job worker (polls the jobs table)
+npm run api
+```
+Job worker (polls the jobs table):
+```bash
+npm run worker
 ```
 Check it is up: `curl localhost:3000/health`
 
