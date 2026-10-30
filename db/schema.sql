@@ -5,10 +5,19 @@ CREATE TABLE IF NOT EXISTS jobs (
   status      TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','running','succeeded','failed')),
   payload     JSONB NOT NULL DEFAULT '{}',
   error       TEXT,
+  result      JSONB,                          -- set on success (e.g. document id + counts for ingest)
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS result JSONB;  -- databases created before `result` existed
 CREATE INDEX IF NOT EXISTS jobs_queued_idx ON jobs (created_at) WHERE status = 'queued';
+
+-- Uploaded SBOM bytes awaiting the worker. Kept out of `jobs` so queue polling never touches blobs.
+-- Deleted when the job succeeds; kept on failure for debugging.
+CREATE TABLE IF NOT EXISTS sbom_uploads (
+  job_id  UUID PRIMARY KEY REFERENCES jobs(id) ON DELETE CASCADE,
+  content BYTEA NOT NULL
+);
 
 -- ---------------------------------------------------------------------------
 -- SBOM storage. Format-neutral: SPDX 2.x/3.0 and CycloneDX 1.x map onto these.
@@ -24,7 +33,7 @@ CREATE TABLE IF NOT EXISTS sbom_documents (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   format            sbom_format NOT NULL,
   spec_version      TEXT NOT NULL,
-  -- SPDX documentNamespace | CycloneDX serialNumber[+version]. Nullable: many CDX docs lack serialNumber.
+  -- SPDX documentNamespace (2.x) / spdxId (3.0) | CycloneDX bom-link form urn:cdx:<uuid>/<version>, so bom-links resolve. Nullable: many CDX docs lack serialNumber.
   doc_identity      TEXT,
   name              TEXT,
   created_at        TIMESTAMPTZ,

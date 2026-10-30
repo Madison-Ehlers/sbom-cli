@@ -1,0 +1,19 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    { "type": "CreationInfo", "@id": "_:ci", "specVersion": "3.0.1", "created": "2026-02-01T09:00:00Z", "createdBy": ["urn:agent:acme"], "createdUsing": ["urn:tool:syft"] },
+    { "type": "Organization", "spdxId": "urn:agent:acme", "name": "Acme Corp", "creationInfo": "_:ci" },
+    { "type": "Tool", "spdxId": "urn:tool:syft", "name": "syft", "creationInfo": "_:ci" },
+    { "type": "SpdxDocument", "spdxId": "https://example.com/spdx/demo-3.0", "name": "demo-3.0", "creationInfo": "_:ci", "rootElement": ["urn:pkg:app"] },
+    { "type": "software_Package", "spdxId": "urn:pkg:app", "name": "demo-app", "software_packageVersion": "1.0.0", "creationInfo": "_:ci" },
+    { "type": "software_Package", "spdxId": "urn:pkg:zlib", "name": "zlib", "software_packageVersion": "1.3.1", "software_packageUrl": "pkg:generic/zlib@1.3.1", "suppliedBy": "urn:agent:acme", "software_primaryPurpose": "library", "verifiedUsing": [{ "type": "Hash", "algorithm": "sha256", "hashValue": "def456" }], "creationInfo": "_:ci" },
+    { "type": "software_Package", "spdxId": "urn:pkg:openssl", "name": "openssl", "software_packageVersion": "3.0.0", "creationInfo": "_:ci" },
+    { "type": "Relationship", "spdxId": "urn:rel:1", "from": "urn:pkg:app", "relationshipType": "dependsOn", "to": ["urn:pkg:zlib"], "creationInfo": "_:ci" },
+    { "type": "LifecycleScopedRelationship", "spdxId": "urn:rel:2", "from": "urn:pkg:app", "relationshipType": "dependsOn", "scope": "build", "to": ["urn:pkg:openssl"], "creationInfo": "_:ci" },
+    { "type": "Relationship", "spdxId": "urn:rel:3", "from": "urn:pkg:app", "relationshipType": "contains", "to": ["urn:pkg:zlib"], "creationInfo": "_:ci" },
+    { "type": "simplelicensing_LicenseExpression", "spdxId": "urn:lic:1", "simplelicensing_licenseExpression": "Zlib OR MIT", "creationInfo": "_:ci" },
+    { "type": "Relationship", "spdxId": "urn:rel:4", "from": "urn:pkg:zlib", "relationshipType": "hasDeclaredLicense", "to": ["urn:lic:1"], "creationInfo": "_:ci" },
+    { "type": "Relationship", "spdxId": "urn:rel:5", "from": "urn:pkg:openssl", "relationshipType": "hasConcludedLicense", "to": ["https://spdx.org/licenses/Apache-2.0"], "creationInfo": "_:ci" },
+    { "type": "Relationship", "spdxId": "urn:rel:6", "from": "urn:pkg:openssl", "relationshipType": "hasDeclaredLicense", "to": ["https://spdx.org/rdf/3.0.1/terms/ExpandedLicensing/NoAssertion"], "creationInfo": "_:ci" }
+  ]
+}
