@@ -92,4 +92,11 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 });
 
 const port = Number(process.env.PORT ?? 3000);
-app.listen(port, () => console.log(`api listening on :${port}`));
+// Express 5 passes listen errors (e.g. EADDRINUSE) to this callback instead of throwing.
+app.listen(port, (err?: Error) => {
+  if (err) {
+    console.error(`api failed to listen on :${port}: ${err.message}`);
+    process.exit(1);
+  }
+  console.log(`api listening on :${port}`);
+});
