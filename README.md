@@ -14,21 +14,14 @@ cp .env.example .env
 ```
 
 ## Database
-Pick one (both: user/password/db `sbom`, port 5432).
-
-Docker (runs `docker compose up -d db`):
-```bash
-yarn db:up
-```
-No Docker (prebuilt Postgres binaries, data in `.pgdata`; runs in the foreground, Ctrl-C to stop):
+Start Postgres (prebuilt binaries, no Docker; data in `.pgdata`, user/password/db `sbom`, port 5432). Runs in the foreground, so leave it in its own terminal and Ctrl-C to stop:
 ```bash
 yarn db:local
 ```
-Then apply the schema:
+Then, in another terminal, apply the schema:
 ```bash
 yarn db:migrate
 ```
-Stop the Docker DB with `yarn db:down`.
 
 ## Services
 Run each in its own terminal.
