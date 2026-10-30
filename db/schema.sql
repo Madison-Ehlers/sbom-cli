@@ -15,9 +15,14 @@ CREATE INDEX IF NOT EXISTS jobs_queued_idx ON jobs (created_at) WHERE status = '
 -- Raw payloads are kept out of these tables so queries never touch blobs.
 -- ---------------------------------------------------------------------------
 
+DO $$ BEGIN
+  CREATE TYPE sbom_format AS ENUM ('spdx','cyclonedx');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS sbom_documents (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  format            TEXT NOT NULL CHECK (format IN ('spdx','cyclonedx')),
+  format            sbom_format NOT NULL,
   spec_version      TEXT NOT NULL,
   -- SPDX documentNamespace | CycloneDX serialNumber[+version]. Nullable: many CDX docs lack serialNumber.
   doc_identity      TEXT,
@@ -40,7 +45,6 @@ CREATE TABLE IF NOT EXISTS components (
   -- SPDXID | bom-ref. Nullable: bom-ref is often absent in CDX.
   local_ref                TEXT,
   name                     TEXT NOT NULL,
-  name_lc                  TEXT NOT NULL,      -- lower(name), for case-insensitive lookup
   version                  TEXT,
   purl                     TEXT,
   type                     TEXT,               -- library | application | framework | ...
@@ -50,7 +54,7 @@ CREATE TABLE IF NOT EXISTS components (
   license_concluded_raw    TEXT,
   UNIQUE (document_id, local_ref)
 );
-CREATE INDEX IF NOT EXISTS components_name_version_idx ON components (name_lc, version);
+CREATE INDEX IF NOT EXISTS components_name_version_idx ON components (lower(name), version);  -- query with WHERE lower(name) = lower($1)
 CREATE INDEX IF NOT EXISTS components_purl_idx ON components (purl) WHERE purl IS NOT NULL;
 CREATE INDEX IF NOT EXISTS components_document_idx ON components (document_id);
 CREATE INDEX IF NOT EXISTS components_parent_idx ON components (parent_id) WHERE parent_id IS NOT NULL;
