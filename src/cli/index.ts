@@ -2,6 +2,7 @@
 import { readFile } from "fs/promises";
 import { basename } from "path";
 import { Command } from "commander";
+import { registerQuery } from "./query";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const POLL_MS = 500;
@@ -53,13 +54,6 @@ function printJob(job: Job) {
 const program = new Command().name("sbom-cli").description("Ingest and query SBOMs");
 
 program
-  .command("hello")
-  .description("Round-trip check: CLI -> API")
-  .action(async () => {
-    console.log((await api("/hello")).message);
-  });
-
-program
   .command("ingest <sbom-file>")
   .description("Ingest a CycloneDX/SPDX JSON SBOM (prints job id)")
   .option("--wait", "wait for the ingest job to finish")
@@ -79,13 +73,7 @@ program
     printJob(await waitForJob(job_id));
   });
 
-program
-  .command("query")
-  .description("Query ingested SBOMs")
-  .option("--component <name>")
-  .option("--version <version>")
-  .option("--license <license>")
-  .action(() => notImplemented("query"));
+registerQuery(program);
 
 program
   .command("job <id>")
@@ -94,11 +82,6 @@ program
   .action(async (id: string, opts: { wait?: boolean }) => {
     printJob(opts.wait ? await waitForJob(id) : await getJob(id));
   });
-
-function notImplemented(cmd: string): never {
-  console.error(`${cmd}: not implemented yet`);
-  process.exit(1);
-}
 
 program.parseAsync().catch((err) => {
   console.error(`error: ${err.message}`);

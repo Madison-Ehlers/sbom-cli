@@ -46,14 +46,15 @@ Check it is up: `curl localhost:3000/health`
 ## CLI
 Set `API_URL` if the API is not on `http://localhost:3000`. Arguments go straight after the script name (no `--`).
 ```bash
-yarn cli hello
 yarn cli --help
 yarn cli ingest <sbom-file> [--wait]
 yarn cli query --component <name> [--version <v>]
 yarn cli query --license <license>
 yarn cli job <id> [--wait]
 ```
-`hello` prints "hello world" via the API. `ingest` prints a job id (or waits with `--wait`); `job` shows status and the ingest summary. `query` is still a stub.
+`ingest` prints a job id (or waits with `--wait`); `job` shows status and the ingest summary.
+
+`query` takes exactly one of `--component` / `--license`. Name and license match case-insensitively, `--version` is exact. Results show the parent document/package and are paginated (`--limit`, default 100; `--after <cursor>` as printed by the previous page); `--json` prints the raw API response. API: `GET /query/components?name=&version=` and `GET /query/licenses?license=`.
 
 Ingest accepts JSON only: CycloneDX 1.x, SPDX 2.x, SPDX 3.x (JSON-LD). Re-ingesting identical bytes is a no-op. Try it:
 ```bash
@@ -88,4 +89,3 @@ Compile with tsc to `dist/` (bin: `dist/cli/index.js`):
 yarn build
 ```
 
-`query` exits 1 with "not implemented yet"; API `/query` returns 501.

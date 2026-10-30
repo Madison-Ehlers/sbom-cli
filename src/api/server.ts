@@ -2,12 +2,9 @@ import express from "express";
 import { pool } from "../db/pool";
 import { detect, parseJson, sha256 } from "../ingest";
 import { ValidationError } from "../ingest/types";
+import { queryRouter } from "./query";
 
 const app = express();
-
-app.get("/hello", (_req, res) => {
-  res.json({ message: "hello world" });
-});
 
 app.get("/health", async (_req, res) => {
   try {
@@ -81,9 +78,7 @@ app.get("/jobs/:id", async (req, res) => {
   res.json(rows[0]);
 });
 
-app.get("/query", (_req, res) => {
-  res.status(501).json({ error: "not implemented" });
-});
+app.use("/query", queryRouter);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const status = (err as any).status ?? 500; // body-parser errors (e.g. 413) carry a status
