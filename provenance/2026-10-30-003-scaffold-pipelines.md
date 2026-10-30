@@ -11,6 +11,3 @@ As the senior engineer for this prompt, go ahead and standup the main pipelines 
 - Verified: db:local up, `db:migrate` applied, `/health` -> `{"status":"ok","db":"up"}`, `sbom-cli hello` -> `hello world`.
 - `ingest`/`query`/`job` registered as stubs; API `/ingest`, `/jobs/:id`, `/query` return 501.
 - Files: package.json, tsconfig.json, docker-compose.yml, .env.example, .gitignore, README.md, db/schema.sql, src/api/server.ts, src/cli/index.ts, src/worker/index.ts, src/db/{pool,migrate,local}.ts, provenance/2026-10-30-003-scaffold-pipelines.md
-
----
-Follow-up prompt (provenance 004): "Commit & push" — committed scaffold and pushed to origin/main.
