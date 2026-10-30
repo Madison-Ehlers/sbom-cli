@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { registerQuery } from "./query";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 
@@ -19,13 +20,7 @@ program
   .description("Ingest a CycloneDX/SPDX JSON SBOM (returns job id)")
   .action(() => notImplemented("ingest"));
 
-program
-  .command("query")
-  .description("Query ingested SBOMs")
-  .option("--component <name>")
-  .option("--version <version>")
-  .option("--license <license>")
-  .action(() => notImplemented("query"));
+registerQuery(program);
 
 program
   .command("job <id>")

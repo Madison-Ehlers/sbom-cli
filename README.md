@@ -46,7 +46,11 @@ yarn cli query --component <name> [--version <v>]
 yarn cli query --license <license>
 yarn cli job <id>
 ```
-`hello` prints "hello world" via the API. The other commands are stubs.
+`hello` prints "hello world" via the API. `query` is implemented; `ingest` and `job` are stubs.
+
+`query` takes exactly one of `--component` / `--license`. Name and license match case-insensitively, `--version` is exact. Results are paginated (`--limit`, default 100; `--after <cursor>` as printed by the previous page); `--json` prints the raw API response. API: `GET /query/components?name=&version=` and `GET /query/licenses?license=`.
+
+To try `query` before ingest lands, load the demo rows into a scratch database (`db/fixtures/query-demo.sql`, after `db/schema.sql`) and point the API at it with `DATABASE_URL`.
 
 ## Build
 Compile with tsc to `dist/` (bin: `dist/cli/index.js`):
@@ -54,4 +58,4 @@ Compile with tsc to `dist/` (bin: `dist/cli/index.js`):
 yarn build
 ```
 
-Stub commands exit 1 with "not implemented yet"; API `/ingest`, `/jobs/:id`, `/query` return 501.
+Stub commands exit 1 with "not implemented yet"; API `/ingest`, `/jobs/:id` return 501.
