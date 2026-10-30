@@ -5,10 +5,6 @@ import { queryRouter } from "./query";
 const app = express();
 app.use(express.json({ limit: "50mb" }));
 
-app.get("/hello", (_req, res) => {
-  res.json({ message: "hello world" });
-});
-
 app.get("/health", async (_req, res) => {
   try {
     await pool.query("SELECT 1");
