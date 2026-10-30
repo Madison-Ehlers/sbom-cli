@@ -25,3 +25,13 @@ CLI → API (Express) → Postgres. The CLI never touches the DB directly.
 ## Scale notes
 - Worker is separable from the API, so workers can scale horizontally for thousands of SBOMs.
 - Reads hit indexed tables, not raw SBOM blobs.
+
+## Data model (`db/schema.sql`)
+Derived from surveying `samples/bom-shelter/in-the-wild` (SPDX 2.2/2.3, CycloneDX 1.2–1.4); also maps SPDX 3.0 / CycloneDX 1.6.
+- **Format-neutral tables** (`sbom_documents`, `components`, `component_edges`, `document_links`, `licenses`, `component_licenses`): one query path for both formats; format specifics are normalized by the worker.
+- **Per-document component rows, no cross-document dedupe**: ingest stays simple and parallel; `purl` links the same package across documents.
+- **`components.parent_id` = single containment parent; `component_edges` = dependency graph**: "parent document/package" is one lookup, and ancestry is a recursive CTE (nesting depth is ~3 in samples, so no closure table).
+- **Nullable `local_ref`, `doc_identity`, `root_component_id`**: bom-ref/serialNumber are often absent; 12/17 sample SPDX docs have no relationships at all, so the document is the fallback parent.
+- **License expressions exploded to leaf ids** (`component_licenses`): `--license MIT` matches `MIT AND ISC` via a plain index lookup. Raw expression kept on `components`. `NONE`/`NOASSERTION` (~99% of sample license fields) create no rows.
+- **`document_links.to_document_id` nullable until the target is ingested**: ingest order doesn't matter; unresolved links stay queryable. No sample data exercises this; needs a hand-written fixture.
+- **Not stored yet**: SPDX `files`, raw payloads (object storage or separate table), tag-value/XML inputs (rejected at validation).
