@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "cli:install": "yarn build && npm install -g .",
+    "cli:uninstall": "npm uninstall -g sbom-cli",
     "api": "tsx src/api/server.ts",
     "worker": "tsx src/worker/index.ts",
     "cli": "tsx src/cli/index.ts",

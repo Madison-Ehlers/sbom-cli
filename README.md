@@ -48,6 +48,22 @@ yarn cli job <id>
 ```
 `hello` prints "hello world" via the API. The other commands are stubs.
 
+## Install the `sbom-cli` command
+The package is `private` (not published to npm); install it from a local checkout. Build and install globally:
+```bash
+yarn cli:install
+```
+Then run `sbom-cli` from anywhere (needs the API and worker running, see Services):
+```bash
+sbom-cli --help
+```
+npm symlinks the global command to this checkout, so `yarn build` picks up changes without reinstalling. Moving or deleting the checkout (or `dist/`) breaks the command. If `npm install -g` needs `sudo` on your machine, point npm at a user-level prefix (`npm config set prefix ~/.npm-global`) and add its `bin` to your `PATH`.
+
+Remove it:
+```bash
+yarn cli:uninstall
+```
+
 ## Build
 Compile with tsc to `dist/` (bin: `dist/cli/index.js`):
 ```bash
