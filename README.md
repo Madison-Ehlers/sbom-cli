@@ -7,8 +7,9 @@ CLI --HTTP--> Express API --enqueue--> Postgres (jobs) <--claim-- Worker
 ```
 
 ## Setup
+Uses [yarn](https://classic.yarnpkg.com) (v1).
 ```bash
-npm install
+yarn install
 cp .env.example .env
 ```
 
@@ -17,45 +18,47 @@ Pick one (both: user/password/db `sbom`, port 5432).
 
 Docker (runs `docker compose up -d db`):
 ```bash
-npm run db:up
+yarn db:up
 ```
 No Docker (prebuilt Postgres binaries, data in `.pgdata`; runs in the foreground, Ctrl-C to stop):
 ```bash
-npm run db:local
+yarn db:local
 ```
 Then apply the schema:
 ```bash
-npm run db:migrate
+yarn db:migrate
 ```
-Stop the Docker DB with `npm run db:down`.
+Stop the Docker DB with `yarn db:down`.
 
 ## Services
 Run each in its own terminal.
 
 Express API on :3000 (set `PORT` to override):
 ```bash
-npm run api
+yarn api
 ```
 Job worker (polls the jobs table):
 ```bash
-npm run worker
+yarn worker
 ```
 Check it is up: `curl localhost:3000/health`
 
 ## CLI
-Set `API_URL` if the API is not on `http://localhost:3000`.
+Set `API_URL` if the API is not on `http://localhost:3000`. Arguments go straight after the script name (no `--`).
 ```bash
-npm run cli -- hello                                   # prints "hello world" via the API
-npm run cli -- --help
-npm run cli -- ingest <sbom-file>                      # stub
-npm run cli -- query --component <name> [--version <v>]  # stub
-npm run cli -- query --license <license>               # stub
-npm run cli -- job <id>                                # stub
+yarn cli hello
+yarn cli --help
+yarn cli ingest <sbom-file>
+yarn cli query --component <name> [--version <v>]
+yarn cli query --license <license>
+yarn cli job <id>
 ```
+`hello` prints "hello world" via the API. The other commands are stubs.
 
 ## Build
+Compile with tsc to `dist/` (bin: `dist/cli/index.js`):
 ```bash
-npm run build   # tsc -> dist/ (bin: dist/cli/index.js)
+yarn build
 ```
 
 Stub commands exit 1 with "not implemented yet"; API `/ingest`, `/jobs/:id`, `/query` return 501.
