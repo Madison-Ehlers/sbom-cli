@@ -13,6 +13,13 @@ yarn install
 cp .env.example .env
 ```
 
+## Quick start
+One command starts Postgres, applies the schema, and runs the API and worker (output is prefixed `[api]` / `[worker]`). Ctrl-C stops everything it started:
+```bash
+yarn dev
+```
+If Postgres is already reachable at `DATABASE_URL` (e.g. `yarn db:local` or Docker), it is reused and left running. The sections below run each piece separately.
+
 ## Database
 Start Postgres (prebuilt binaries, no Docker; data in `.pgdata`, user/password/db `sbom`, port 5432). Runs in the foreground, so leave it in its own terminal and Ctrl-C to stop:
 ```bash

@@ -1,32 +1,16 @@
-// Docker-free local Postgres (prebuilt binaries via embedded-postgres).
-// Same credentials/port as docker-compose.yml. Data lives in ./.pgdata.
-import EmbeddedPostgres from "embedded-postgres";
-import { existsSync } from "fs";
+// Foreground Docker-free Postgres. Same credentials/port as docker-compose.yml. Data lives in ./.pgdata.
+import { DEFAULT_DATABASE_URL, startEmbeddedDb } from "./embedded";
 
 async function main() {
-  const pg = new EmbeddedPostgres({
-    databaseDir: ".pgdata",
-    user: "sbom",
-    password: "sbom",
-    port: 5432,
-    persistent: true,
-  });
-  if (!existsSync(".pgdata/PG_VERSION")) {
-    await pg.initialise();
-  }
-  await pg.start();
-  try {
-    await pg.createDatabase("sbom");
-  } catch {
-    // already exists
-  }
-  console.log("postgres ready on :5432 (db=sbom user=sbom)");
-  const stop = async () => {
-    await pg.stop();
+  const databaseUrl = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
+  const { stop } = await startEmbeddedDb(databaseUrl);
+  console.log(`postgres ready on :${new URL(databaseUrl).port || 5432}`);
+  const shutdown = async () => {
+    await stop();
     process.exit(0);
   };
-  process.on("SIGINT", stop);
-  process.on("SIGTERM", stop);
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
 main().catch((err) => {
