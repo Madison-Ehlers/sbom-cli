@@ -1,0 +1,32 @@
+{
+  "name": "sbom-cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ingest and query CycloneDX / SPDX SBOMs",
+  "bin": {
+    "sbom-cli": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "api": "tsx src/api/server.ts",
+    "worker": "tsx src/worker/index.ts",
+    "cli": "tsx src/cli/index.ts",
+    "db:up": "docker compose up -d db",
+    "db:local": "tsx src/db/local.ts",
+    "db:down": "docker compose down",
+    "db:migrate": "tsx src/db/migrate.ts"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "embedded-postgres": "^18.6.0-beta.19",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
