@@ -16,7 +16,8 @@
     "db:up": "docker compose up -d db",
     "db:local": "tsx src/db/local.ts",
     "db:down": "docker compose down",
-    "db:migrate": "tsx src/db/migrate.ts"
+    "db:migrate": "tsx src/db/migrate.ts",
+    "test": "tsx --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "commander": "^15.0.0",

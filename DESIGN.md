@@ -16,6 +16,22 @@ CLI → API (Express) → Postgres. The CLI never touches the DB directly.
 - CLI polls job status (or `--wait`) until done/failed.
   - Reason: simple, stateless client; no websockets needed.
 
+#### Ingest pipeline (`src/ingest`, `src/worker`)
+- **API** (`POST /ingest`, raw file body): checks it is a JSON CycloneDX 1.x / SPDX 2.x / SPDX 3.x document, then in one transaction inserts a `jobs` row and the bytes into `sbom_uploads`; returns `202 {job_id}`. `GET /jobs/:id` returns status, error, and result.
+  - Reason: the only inline O(size) work is `JSON.parse` (tens of ms for multi-MB SBOMs; body capped at 50mb). Bytes live in a separate table so queue polling never reads blobs.
+- **Worker**: claims with `FOR UPDATE SKIP LOCKED`, runs the handler for `job.type` in one transaction together with the `succeeded` update, so a failed job leaves no partial document. Failures are recorded on the job (`failed` + `error`).
+- **Parsers** (`parse/cyclonedx.ts`, `spdx2.ts`, `spdx3.ts`) emit one format-neutral `NormSbom`; `persist.ts` is the only code that knows the tables.
+  - Reason: query code and schema stay format-agnostic; adding SPDX 3 / CDX 1.6 did not touch persistence.
+- **Persist**: component ids are pre-allocated from the sequence, then each table is filled by one `INSERT ... SELECT FROM jsonb_to_recordset($1)`. ~8 round trips per document regardless of component count.
+- **Idempotency**: `content_sha256` is unique; re-ingest finishes `succeeded` with `duplicate: true` and writes nothing. Concurrent identical ingests serialize on the unique index.
+- **Normalization rules**:
+  - Directional relationships are flipped (`X BUILD_DEPENDENCY_OF Y` -> `Y build_depends_on X`); unrecognized types are kept as `other` with `raw_rel_type`.
+  - `parent_id` = CDX nesting, or first SPDX `CONTAINS` (skipped if it would form a cycle); `contains` edges record all explicit containment.
+  - Relationships to files / `NOASSERTION` / unknown refs are dropped and counted (`dropped_relationships`); duplicate `local_ref`s keep the first.
+  - CDX `doc_identity` = `urn:cdx:<uuid>/<version>` (bom-link form); SPDX = namespace (2.x) / `spdxId` (3.x). `document_links` resolve in both directions at ingest, so order does not matter.
+  - CDX 1.6 `acknowledgement: concluded` -> concluded; `evidence.licenses` -> `evidence`; free-text `license.name` -> `is_spdx = false`.
+- **Known gaps**: a worker that dies mid-job leaves it `running` (needs a lease/heartbeat); failed uploads are retained, never garbage-collected; one document is persisted in a single statement per table (a multi-million-component SBOM would need chunking); SPDX files are not stored.
+
 ### Query: synchronous
 - `sbom-cli query --component ...` / `--license ...` are served inline by the API, directly from Postgres.
   - Reason: indexed lookups, expected well under 200ms; a job round-trip would only add latency.

@@ -41,12 +41,23 @@ Set `API_URL` if the API is not on `http://localhost:3000`. Arguments go straigh
 ```bash
 yarn cli hello
 yarn cli --help
-yarn cli ingest <sbom-file>
+yarn cli ingest <sbom-file> [--wait]
 yarn cli query --component <name> [--version <v>]
 yarn cli query --license <license>
-yarn cli job <id>
+yarn cli job <id> [--wait]
 ```
-`hello` prints "hello world" via the API. The other commands are stubs.
+`hello` prints "hello world" via the API. `ingest` prints a job id (or waits with `--wait`); `job` shows status and the ingest summary. `query` is still a stub.
+
+Ingest accepts JSON only: CycloneDX 1.x, SPDX 2.x, SPDX 3.x (JSON-LD). Re-ingesting identical bytes is a no-op. Try it:
+```bash
+yarn cli ingest fixtures/cyclonedx-1.6.json --wait
+yarn cli ingest samples/bom-shelter/in-the-wild/spdx/flux_0.26.3_sbom.spdx.json --wait
+```
+
+## Test
+```bash
+yarn test
+```
 
 ## Install the `sbom-cli` command
 The package is `private` (not published to npm); install it from a local checkout. Build and install globally:
@@ -70,4 +81,4 @@ Compile with tsc to `dist/` (bin: `dist/cli/index.js`):
 yarn build
 ```
 
-Stub commands exit 1 with "not implemented yet"; API `/ingest`, `/jobs/:id`, `/query` return 501.
+`query` exits 1 with "not implemented yet"; API `/query` returns 501.
