@@ -1,0 +1,3 @@
+[submodule "samples/bom-shelter"]
+	path = samples/bom-shelter
+	url = https://github.com/chainguard-sandbox/bom-shelter
